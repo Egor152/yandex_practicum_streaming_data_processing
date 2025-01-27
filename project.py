@@ -151,16 +151,16 @@ result_df = joined_data.selectExpr('restaurant_id',
 
 
 
-# метод для записи данных в 2 target: в PostgreSQL для фидбэков и в Kafka для триггеров - коммент авторов
+# метод для записи данных в 2 target: в PostgreSQL для фидбэков и в Kafka для триггеров
 def foreach_batch_function(df, epoch_id):
-    # сохраняем df в памяти, чтобы не создавать df заново перед отправкой в Kafka. - коммент авторов
+    # сохраняем df в памяти, чтобы не создавать df заново перед отправкой в Kafka.
     
     logger.info(f"Processing epoch_id: {epoch_id}")
     
     df.persist(StorageLevel.MEMORY_ONLY)
      
 
-    # записываем df в PostgreSQL с полем feedback. - коммент авторов
+    # записываем df в PostgreSQL с полем feedback.
     logger.info(f"количество записей, которые записываются в subscribers_feedback: {df.count()}")
     
 
@@ -179,7 +179,7 @@ def foreach_batch_function(df, epoch_id):
       .option('dbtable', 'subscribers_feedback')\
       .save()
     
-    # создаём df для отправки в Kafka. Сериализация в json. - коммент авторов
+    # создаём df для отправки в Kafka. Сериализация в json.
     df_for_sending = df.select(F.to_json(F.struct('restaurant_id',
                                                          'adv_campaign_id',
                                                          'adv_campaign_content',
@@ -192,7 +192,7 @@ def foreach_batch_function(df, epoch_id):
                                                          'trigger_datetime_created')).alias('value')
                                      )
 
-    # отправляем сообщения в результирующий топик Kafka без поля feedback - коммент авторов
+    # отправляем сообщения в результирующий топик Kafka без поля feedback
     # поменял код записи данных в топик
     df_for_sending\
              .write\
